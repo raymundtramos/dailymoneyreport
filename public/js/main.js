@@ -4,9 +4,12 @@ function getDateStringHeader(currentDate) {
     var cYear = currentDate.getFullYear();
     var date = cMonth + '/' + cDay + '/' + cYear;
     var cHours = currentDate.getHours();
+    var cHoursDisplay = (cHours <= 12) ? cHours : (cHours - 12);
     var cMinutes = currentDate.getMinutes();
+    var cMinutesDisplay = (cMinutes < 10) ? '0' + cMinutes.toString() : cMinutes;
     var cSeconds = currentDate.getSeconds();
-    var time = (cHours - 12) + ':' + cMinutes + ':' + cSeconds;
+    var cSecondsDisplay = (cSeconds < 10) ? '0' + cSeconds.toString() : cSeconds;
+    var time = cHoursDisplay + ':' + cMinutesDisplay + ':' + cSecondsDisplay;
     time += (cHours < 12) ? ' A.M.' : ' P.M.';
 
     return (date + ' - ' + time)
@@ -22,43 +25,16 @@ function getDateStringFilename(currentDate) {
     return (date + '-' + time)
 }
 
-function generateReportHeader(parentElement, dateString) {
-    var titleElement = document.createElement('h1');
-    titleElement.innerText = 'Daily Money Report - ' + dateString;
-
-    parentElement.appendChild(titleElement);
-}
-
-function addValueToTable(table, denomination, count, total) {
-    var htmlRow = document.createElement('tr');
-    htmlRow.className = 'reportTableInfo';
-
-    var htmlColumn = document.createElement('td');
-    htmlColumn.className = 'reportDenomination';
-    htmlColumn.innerText = denomination;
-    htmlRow.appendChild(htmlColumn);
-
-    var htmlColumn = document.createElement('td');
-    htmlColumn.className = 'reportCount';
-    htmlColumn.innerText = count;
-    htmlRow.appendChild(htmlColumn);
-
-    var htmlColumn = document.createElement('td');
-    htmlColumn.className = 'reportTotal';
-    htmlColumn.innerText = '$' + total.toFixed(2);
-    htmlRow.appendChild(htmlColumn);
-
-    table.appendChild(htmlRow)
-}
-
-function generateBreakdownTable(parentElement, title, denominationsArray, isCents) {
+function generateBreakdownTable(doc, xMargin, yMargin, title, denominationsArray, isCents) {
     var finalTotal = 0;
 
-    var titleElement = document.createElement('h2');
-    titleElement.innerText = title;
+    var tableColumns = [
+        { header: 'Denomination', dataKey: 'denomination', styles: { fillColor: [0, 0, 0] } },
+        { header: 'Count', dataKey: 'count' },
+        { header: 'Total', dataKey: 'total' }
+    ];
 
-    var tableElement = document.createElement('table');
-    tableElement.className = 'reportTable'
+    var tableBody = [];
 
     var elementPrefix = (isCents) ? 'cent' : 'dollar';
 
@@ -68,63 +44,97 @@ function generateBreakdownTable(parentElement, title, denominationsArray, isCent
         elementName = elementPrefix + denomination;
         denominationCount = parseInt(document.querySelector('[name=' + elementName + ']').value);
         denominationCount = (isNaN(denominationCount)) ? 0 : denominationCount;
-        denominationTotal = parseFloat((denominationCount * denominationValue).toFixed(2));
+        denominationTotal = parseFloat((denominationCount * denominationValue));
 
         // Update the report
-        addValueToTable(tableElement, '$' + denominationValue, denominationCount, denominationTotal);
+        tableBody.push({ denomination: '$' + denominationValue, count: denominationCount, total: '$' + denominationTotal.toFixed(2) });
 
         // Update the total
-        finalTotal += denominationTotal;
+        finalTotal += parseFloat(denominationTotal);
     }
 
-    addValueToTable(tableElement, "", "", finalTotal);
+    tableBody.push({ denomination: '', count: '', total: '$' + finalTotal.toFixed(2) });
 
-    parentElement.appendChild(titleElement);
-    parentElement.appendChild(tableElement);
+    // Calculate the table width for the column sizes
+    var tableWidth = doc.internal.pageSize.getWidth();
+
+    // Subtract the 2 side margins
+    tableWidth -= (xMargin * 2);
+
+    // Add to the PDF document
+    var nextYMargin = doc.lastAutoTable.finalY || yMargin;
+
+    doc.text(title, xMargin, nextYMargin + yMargin);
+
+    doc.autoTable({
+        margin: { top: 0, left: xMargin, right: xMargin, bottom: 0 },
+        startY: nextYMargin + (yMargin * 2),
+        body: tableBody,
+        columns: tableColumns,
+        columnStyles: {
+            denomination: { cellWidth: parseInt(tableWidth * 0.6), lineColor: '576574', lineWidth: { bottom: 0.5 } },
+            count: { cellWidth: parseInt(tableWidth * 0.2), lineColor: '576574', lineWidth: { bottom: 0.5 } },
+            total: { cellWidth: parseInt(tableWidth * 0.2), lineColor: '576574', lineWidth: { bottom: 0.5 } }
+        },
+    });
 
     return finalTotal;
 }
 
-function generateFinalTotal(parentElement, billTotal, coinTotal) {
-    var titleElement = document.createElement('h2');
-    titleElement.innerText = 'Final Total';
+function generateFinalTotal(doc, xMargin, yMargin, billTotal, coinTotal) {
+    var tableColumns = [
+        { header: 'Type', dataKey: 'type' },
+        { header: '', dataKey: 'empty' },
+        { header: 'Total', dataKey: 'total' }
+    ];
 
-    var tableElement = document.createElement('table');
-    tableElement.className = 'reportTable'
+    var tableBody = [
+        { type: 'Bills', empty: '', total: '$' + billTotal.toFixed(2) },
+        { type: 'Coins', empty: '', total: '$' + coinTotal.toFixed(2) },
+        { type: '', empty: '', total: '$' + (billTotal + coinTotal).toFixed(2) }
+    ];
 
-    addValueToTable(tableElement, "Bills", "", billTotal);
-    addValueToTable(tableElement, "Coins", "", coinTotal);
-    addValueToTable(tableElement, "", "", billTotal + coinTotal);
+    // Calculate the table width for the column sizes
+    var tableWidth = doc.internal.pageSize.getWidth();
 
-    parentElement.appendChild(titleElement);
-    parentElement.appendChild(tableElement);
+    // Subtract the 2 side margins
+    tableWidth -= (xMargin * 2);
+
+    var nextYMargin = doc.lastAutoTable.finalY || yMargin;
+
+    doc.text('Final Total', xMargin, nextYMargin + yMargin)
+
+    doc.autoTable({
+        margin: { top: 0, left: xMargin, right: xMargin, bottom: 0 },
+        startY: nextYMargin + (yMargin * 2),
+        body: tableBody,
+        columns: tableColumns,
+        columnStyles: {
+            type: { cellWidth: parseInt(tableWidth * 0.6), lineColor: '576574', lineWidth: { bottom: 0.5 } },
+            empty: { cellWidth: parseInt(tableWidth * 0.2), lineColor: '576574', lineWidth: { bottom: 0.5 } },
+            total: { cellWidth: parseInt(tableWidth * 0.2), lineColor: '576574', lineWidth: { bottom: 0.5 } }
+        }
+    });
 }
 
 function generateOpenReport() {
-    var total = 0;
     var billTotal = 0;
     var coinTotal = 0;
     var billDenominations = new Array(100, 50, 20, 10, 5, 1);
     var coinDenominations = new Array(25, 10, 5, 1);
+
     var currentDate = new Date();
     var dateStringHeader = getDateStringHeader(currentDate);
     var dateStringFilename = getDateStringFilename(currentDate);
 
-    var parentElement = document.createElement('div');
-    parentElement.className = 'report';
-    // parentElement.style.width = window.innerWidth;
-    // parentElement.style.height = window.innerHeight;
+    var xMargin = 20;
+    var yMargin = 30;
+    var doc = new jspdf.jsPDF("p", "pt", "letter", true);
+    doc.text('Daily Money Report - ' + dateStringHeader, xMargin, yMargin);
 
-    generateReportHeader(parentElement, dateStringHeader);
-    billTotal = generateBreakdownTable(parentElement, "Bills", billDenominations, false);
-    coinTotal = generateBreakdownTable(parentElement, "Coins", coinDenominations, true);
-    generateFinalTotal(parentElement, billTotal, coinTotal);
+    billTotal = generateBreakdownTable(doc, xMargin, yMargin, "Bills", billDenominations, false);
+    coinTotal = generateBreakdownTable(doc, xMargin, yMargin, "Coins", coinDenominations, true);
+    generateFinalTotal(doc, xMargin, yMargin, billTotal, coinTotal);
 
-    html2pdf(parentElement, {
-        margin: 0.25,
-        filename: 'DailyMoneyReport_' + dateStringFilename + '.pdf',
-        image: { type: 'jpeg', quality: 1.00 },
-        html2canvas: { dpi: 300, letterRendering: true, scrollX: 0, scrollY: 0 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    });
+    doc.save('DailyMoneyReport_' + dateStringFilename + '.pdf');
 }
