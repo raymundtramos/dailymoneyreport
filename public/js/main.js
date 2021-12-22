@@ -65,7 +65,9 @@ function addValueToTable(table, denomination, count, total) {
     table.appendChild(htmlRow)
 }
 
-function generateBreakdownTable(parentElement, title, denominationsArray, finalTotal, isCents) {
+function generateBreakdownTable(parentElement, title, denominationsArray, isCents) {
+    var finalTotal = 0;
+
     var titleElement = document.createElement('h2');
     titleElement.innerText = title;
 
@@ -79,7 +81,7 @@ function generateBreakdownTable(parentElement, title, denominationsArray, finalT
         denominationValue = (isCents) ? parseFloat((denomination / 100).toFixed(2)) : denomination;
         elementName = elementPrefix + denomination;
         denominationCount = parseInt(document.querySelector('[name=' + elementName + ']').value);
-        denominationTotal = parseFloat((denominationCount * denomination).toFixed(2));
+        denominationTotal = parseFloat((denominationCount * denominationValue).toFixed(2));
 
         // Update the report
         addValueToTable(tableElement, '$' + denomination, denominationCount, denominationTotal);
@@ -92,6 +94,8 @@ function generateBreakdownTable(parentElement, title, denominationsArray, finalT
 
     parentElement.appendChild(titleElement);
     parentElement.appendChild(tableElement);
+
+    return finalTotal;
 }
 
 function generateFinalTotal(parentElement, billTotal, coinTotal) {
@@ -123,8 +127,8 @@ function generateOpenReport() {
     parentElement.className = 'report';
 
     generateReportHeader(parentElement, dateStringHeader);
-    generateBreakdownTable(parentElement, "Bills", billDenominations, billTotal, false);
-    generateBreakdownTable(parentElement, "Coins", coinDenominations, coinTotal, true);
+    billTotal = generateBreakdownTable(parentElement, "Bills", billDenominations, false);
+    coinTotal = generateBreakdownTable(parentElement, "Coins", coinDenominations, true);
     generateFinalTotal(parentElement, billTotal, coinTotal);
 
     html2pdf(parentElement, {
