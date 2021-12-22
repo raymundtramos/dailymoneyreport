@@ -1,51 +1,44 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width = device-width, initial-scale = 2.3, user-scalable = no" />
+    <meta name="viewport" content="width = device-width, initial-scale = 2.3, minimum-scale = 1, maximum-scale = 5" />
+    <link rel="stylesheet" type="text/css" href="/css/jquery.mobile-1.4.5.min.css">
     <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <script src="socket.io.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+    <script src="js/html2pdf.bundle.min.js"></script>
+    <script src="js/main.js"></script>
 </head>
 
 <body>
-    <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'Open')">Open</button>
-        <button class="tablinks" onclick="openTab(event, 'Close')">Close</button>
+    <div data-role="main" class="ui-content">
+        <form>
+            <label for="dollar100">Count of $100:</label>
+            <input type="number" name="dollar100" value="" data-clear-btn="true">
+            <label for="dollar50">Count of $50:</label>
+            <input type="number" name="dollar50" value="" data-clear-btn="true">
+            <label for="dollar20">Count of $20:</label>
+            <input type="number" name="dollar20" value="" data-clear-btn="true">
+            <label for="dollar10">Count of $10:</label>
+            <input type="number" name="dollar10" value="" data-clear-btn="true">
+            <label for="dollar5">Count of $5:</label>
+            <input type="number" name="dollar5" value="" data-clear-btn="true">
+            <label for="dollar1">Count of $1:</label>
+            <input type="number" name="dollar1" value="" data-clear-btn="true">
+            <label for="cent25">Count of $0.25:</label>
+            <input type="number" name="cent25" value="" data-clear-btn="true">
+            <label for="cent10">Count of $0.10:</label>
+            <input type="number" name="cent10" value="" data-clear-btn="true">
+            <label for="cent5">Count of $0.05:</label>
+            <input type="number" name="cent5" value="" data-clear-btn="true">
+            <label for="cent1">Count of $0.01:</label>
+            <input type="number" name="cent1" value="" data-clear-btn="true">
+        </form>
+
+        <button class="ui-btn" onclick="generateOpenReport()">Generate Report</button>
     </div>
-
-    <!-- Tab content -->
-    <div id="Open" class="tabcontent">
-        <b>Count of $100:</b>
-        <input name="dollar100" type="number" value="0" /></br>
-        <b>Count of $50:</b>
-        <input name="dollar50" type="number" value="0" /></br>
-        <b>Count of $20:</b>
-        <input name="dollar20" type="number" value="0" /></br>
-        <b>Count of $10:</b>
-        <input name="dollar10" type="number" value="0" /></br>
-        <b>Count of $5:</b>
-        <input name="dollar5" type="number" value="0" /></br>
-        <b>Count of $1:</b>
-        <input name="dollar1" type="number" value="0" /></br>
-
-        <b>Count of $0.25:</b>
-        <input name="cent25" type="number" value="0" /></br>
-        <b>Count of $0.10:</b>
-        <input name="cent10" type="number" value="0" /></br>
-        <b>Count of $0.05:</b>
-        <input name="cent5" type="number" value="0" /></br>
-        <b>Count of $0.01:</b>
-        <input name="cent1" type="number" value="0" /></br>
-
-        <button onclick="generateOpenReport()">Generate Report</button>
-    </div>
-
-    <div id="Close" class="tabcontent">
-        <h3>Paris</h3>
-        <p>Paris is the capital of France.</p>
-    </div>
-
-    <script src="socket.io.js"></script>
-    <script src="js/html2pdf.bundle.min.js"></script>
-    <script src="js/main.js"></script>
-
 </body>
 
 </html>

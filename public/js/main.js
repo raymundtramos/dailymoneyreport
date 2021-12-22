@@ -1,17 +1,3 @@
-function openTab(evt, cityName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(cityName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
 function getDateStringHeader(currentDate) {
     var cDay = currentDate.getDate();
     var cMonth = currentDate.getMonth() + 1;
@@ -81,6 +67,7 @@ function generateBreakdownTable(parentElement, title, denominationsArray, isCent
         denominationValue = (isCents) ? parseFloat((denomination / 100)).toFixed(2) : denomination;
         elementName = elementPrefix + denomination;
         denominationCount = parseInt(document.querySelector('[name=' + elementName + ']').value);
+        denominationCount = (isNaN(denominationCount)) ? 0 : denominationCount;
         denominationTotal = parseFloat((denominationCount * denominationValue).toFixed(2));
 
         // Update the report
@@ -125,6 +112,8 @@ function generateOpenReport() {
 
     var parentElement = document.createElement('div');
     parentElement.className = 'report';
+    // parentElement.style.width = window.innerWidth;
+    // parentElement.style.height = window.innerHeight;
 
     generateReportHeader(parentElement, dateStringHeader);
     billTotal = generateBreakdownTable(parentElement, "Bills", billDenominations, false);
@@ -135,7 +124,7 @@ function generateOpenReport() {
         margin: 0.25,
         filename: 'DailyMoneyReport_' + dateStringFilename + '.pdf',
         image: { type: 'jpeg', quality: 1.00 },
-        html2canvas: { dpi: 300, letterRendering: true },
+        html2canvas: { dpi: 300, letterRendering: true, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     });
 }
