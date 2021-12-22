@@ -78,13 +78,13 @@ function generateBreakdownTable(parentElement, title, denominationsArray, isCent
 
     for (var i = 0; i < denominationsArray.length; i++) {
         denomination = denominationsArray[i];
-        denominationValue = (isCents) ? parseFloat((denomination / 100).toFixed(2)) : denomination;
+        denominationValue = (isCents) ? parseFloat((denomination / 100)).toFixed(2) : denomination;
         elementName = elementPrefix + denomination;
         denominationCount = parseInt(document.querySelector('[name=' + elementName + ']').value);
         denominationTotal = parseFloat((denominationCount * denominationValue).toFixed(2));
 
         // Update the report
-        addValueToTable(tableElement, '$' + denomination, denominationCount, denominationTotal);
+        addValueToTable(tableElement, '$' + denominationValue, denominationCount, denominationTotal);
 
         // Update the total
         finalTotal += denominationTotal;
