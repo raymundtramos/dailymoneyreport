@@ -1,0 +1,23 @@
+{
+    "name": "dailymoneyreport",
+    "version": "1.0.0",
+    "description": "Simple Money Report for start and end of day",
+    "author": "Raymund Theodore Ramos",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/raymundtramos/dailymoneyreport.git"
+    },
+    "bugs": {
+        "url": "https://github.com/raymundtramos/dailymoneyreport/issues"
+    },
+    "homepage": "https://github.com/raymundtramos/dailymoneyreport#readme",
+    "dependencies": {
+        "express": "^4.17.1",
+        "socket.io": "^2.3.0"
+    }
+}
